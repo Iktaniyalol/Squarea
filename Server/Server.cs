@@ -11,13 +11,24 @@ namespace Server
         ushort maxPlayers = 30; //максимальное количество игроков, может быть в будущем настроено через файл настройки сервера.
         Player[] players;
 
+        Network network;
+
         public Server()
         {
             players = new Player[maxPlayers]; //Создаем массив игроков
 
             //TODO различные загрузки
-            // Сеть
+            // Подключаем сервер к сети
+            network = new Network(this, new IPEndPoint(IP, port), maxPlayers);
             Console.WriteLine("Сервер запущен.");
+        }
+
+        public Network GetNetwork
+        {
+            get
+            {
+                return network;
+            }
         }
     }
 }
