@@ -9,12 +9,10 @@ namespace Server.Net
 {
     public class Network
     {
-        Socket socket;
         ushort maxConnectionsCount;
         ushort countOfConnections = 0;
         static Type[] packets = new Type[20];
         TcpListener listener;
-        List<EndPoint> sessions;
         Server server;
         public Network(Server server, IPEndPoint ipPort, ushort maxConnectionsCount)
         {
@@ -55,13 +53,6 @@ namespace Server.Net
             }
         }
 
-        public Socket GetSocket
-        {
-            get
-            {
-                return socket;
-            }
-        }
         void RegisterPackets()
         {
             packets[DataPacket.REGISTER_PACKET] = typeof(RegisterPacket);
@@ -144,7 +135,7 @@ namespace Server.Net
     }
 
 
-    class PlayerSession
+    public class PlayerSession
     {
         Socket socket;
         Queue<DataPacket> outbound = new Queue<DataPacket>();
