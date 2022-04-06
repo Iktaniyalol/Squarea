@@ -29,5 +29,10 @@ namespace Client.Net.Packets
             this.username = reader.ReadString(); //Логин авторизующегося пользоваться
             this.password = reader.ReadString(); //Пароль, зашифрованный SHA256
         }
+
+        public override void Handle(Client client)
+        {
+            //TODO
+        }
     }
 }

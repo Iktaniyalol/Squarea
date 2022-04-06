@@ -2,14 +2,13 @@
 
 namespace Client.Net.Packets
 {
-    class RegisterPacket : DataPacket
+    class GuestLoginResultPacket : DataPacket
     {
-        public string username;
-        public string password;
+        public string playerName;
 
         override public byte GetId()
         {
-            return REGISTER_PACKET;
+            return GUEST_LOGIN_RESULT_PACKET;
         }
 
         public override void Encode()
@@ -17,8 +16,7 @@ namespace Client.Net.Packets
             MemoryStream memory = new MemoryStream();
             BinaryWriter writer = new BinaryWriter(memory);
             writer.Write(GetId()); //ID пакета
-            writer.Write(username); //Логин регистрирующегося пользователя
-            writer.Write(password); //Пароль, зашифрованный SHA256, сервер получает его уже зашифрованным
+            writer.Write(playerName); //Ник, который мы присвоим нашему гостю
             data = memory.ToArray();
         }
 
@@ -26,8 +24,7 @@ namespace Client.Net.Packets
         {
             MemoryStream memory = new MemoryStream(data);
             BinaryReader reader = new BinaryReader(memory);
-            this.username = reader.ReadString(); //Логин регистрирующегося пользователя
-            this.password = reader.ReadString(); //Пароль, зашифрованный SHA256
+            this.playerName = reader.ReadString(); //Ник гостя
         }
 
         public override void Handle(Client client)

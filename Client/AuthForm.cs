@@ -55,12 +55,25 @@ namespace Client
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            //TODO Таймер будет проверять подключение к серверу
+            if (!Client.GetInstance.GetNetwork.connected)
+            {
+                AuthPanel.Visible = false;
+                LogPanel.Visible = false;
+                RegPanel.Visible = false;
+                Loading.Visible = true;
+            }
+            else
+            {
+                Loading.Visible = false; //Текст, информирующий о том, что идет загрузка.
+                RegPanel.Visible = false;
+                LogPanel.Visible = false;
+                AuthPanel.Visible = true;
+            }
         }
 
         private void AuthForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            //TODO Убивать потоки
+            Client.GetInstance.GetNetwork.DestroyNetworkThreads();
         }
     }
 }

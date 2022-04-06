@@ -34,5 +34,10 @@ namespace Client
                 return instance;
             }
         }
+
+        public void SendPacketToServer(DataPacket packet)
+        {
+            GetNetwork.TcpSendPacket(packet);
+        }
     }
 }

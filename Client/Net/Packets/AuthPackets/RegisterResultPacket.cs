@@ -32,5 +32,10 @@ namespace Client.Net.Packets
             BinaryReader reader = new BinaryReader(memory);
             this.status = (Result)reader.ReadInt32(); //Статус
         }
+
+        public override void Handle(Client client)
+        {
+            //TODO
+        }
     }
 }

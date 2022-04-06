@@ -10,7 +10,7 @@
         public const int PLAYER_CONNECT_PACKET = 5;
         public const int PLAYER_DISCONNECT_PACKET = 6;
         public const int PLAYER_SPAWN_PACKET = 7;
-        public const int PLAYER_CHAT_PACKET = 8;
+        public const int TEXT_PACKET = 8;
         public const int PLAYER_MOVE_PACKET = 9;
         public const int PLAYER_CHANGE_PACKET = 10;
         public const int PLAYER_REMOVE_PACKET = 11;
@@ -18,6 +18,8 @@
         public const int ENTITY_MOVE_PACKET = 13;
         public const int ENTITY_CHANGE_PACKET = 14;
         public const int ENTITY_REMOVE_PACKET = 15;
+        public const int GUEST_LOGIN_PACKET = 16;
+        public const int GUEST_LOGIN_RESULT_PACKET = 17;
         //TODO Новые пакеты
 
         protected byte[] data;
@@ -29,6 +31,10 @@
         }
 
         virtual public void Decode()
+        {
+        }
+
+        virtual public void Handle(Client client)
         {
         }
 

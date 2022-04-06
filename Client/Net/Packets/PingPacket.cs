@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
+﻿using System.IO;
 
 namespace Client.Net.Packets
 {
@@ -18,7 +15,7 @@ namespace Client.Net.Packets
             MemoryStream memory = new MemoryStream();
             BinaryWriter writer = new BinaryWriter(memory);
             writer.Write(GetId()); //ID пакета
-            writer.Write(isCallback); //Ответный ли пакет
+            writer.Write(isCallback); //От кого пакет
             data = memory.ToArray();
         }
 
@@ -26,7 +23,15 @@ namespace Client.Net.Packets
         {
             MemoryStream memory = new MemoryStream(data);
             BinaryReader reader = new BinaryReader(memory);
-            this.isCallback = reader.ReadBoolean(); //Ответный ли пакет
+            this.isCallback = reader.ReadBoolean(); //От кого пакет
+        }
+
+        public override void Handle(Client client)
+        {
+            if (!isCallback)
+            {
+                Client.GetInstance.SendPacketToServer(new PingPacket());
+            }
         }
     }
 }
