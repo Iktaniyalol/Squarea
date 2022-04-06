@@ -29,5 +29,10 @@ namespace Server.Net.Packets
             this.username = reader.ReadString(); //Логин регистрирующегося пользователя
             this.password = reader.ReadString(); //Пароль, зашифрованный SHA256
         }
+
+        public override void Handle(PlayerSession session)
+        {
+            //TODO
+        }
     }
 }

@@ -2,27 +2,20 @@
 
 namespace Server.Net.Packets
 {
-    class RegisterResultPacket : DataPacket
+    class PingPacket : DataPacket
     {
-        public Result status;
-
-        public enum Result
-        {
-            UsernameAlreadyUsed = 0,
-            Success = 1,
-            Error = 2
-        }
+        public bool isCallback = false;
         override public byte GetId()
         {
-            return REGISTER_RESULT_PACKET;
+            return DataPacket.PING_PACKET;
         }
 
-        public override void Encode()
+        override public void Encode()
         {
             MemoryStream memory = new MemoryStream();
             BinaryWriter writer = new BinaryWriter(memory);
             writer.Write(GetId()); //ID пакета
-            writer.Write((int)status); //Статус
+            writer.Write(isCallback); //От кого пакет
             data = memory.ToArray();
         }
 
@@ -30,7 +23,7 @@ namespace Server.Net.Packets
         {
             MemoryStream memory = new MemoryStream(data);
             BinaryReader reader = new BinaryReader(memory);
-            this.status = (Result)reader.ReadInt32(); //Статус
+            this.isCallback = reader.ReadBoolean(); //От кого пакет
         }
 
         public override void Handle(PlayerSession session)

@@ -30,8 +30,12 @@ namespace Server.Net.Packets
         {
             MemoryStream memory = new MemoryStream(data);
             BinaryReader reader = new BinaryReader(memory);
-            reader.ReadByte(); //ID пакета
             this.status = (Result) reader.ReadInt32(); //Статус
+        }
+
+        public override void Handle(PlayerSession session)
+        {
+            //TODO
         }
     }
 }
