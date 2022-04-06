@@ -1,0 +1,7 @@
+﻿
+namespace Client
+{
+    class Player
+    {
+    }
+}

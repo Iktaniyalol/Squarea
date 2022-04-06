@@ -1,0 +1,32 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.IO;
+
+namespace Client.Net.Packets
+{
+    class PingPacket : DataPacket
+    {
+        public bool isCallback = false;
+        override public byte GetId()
+        {
+            return DataPacket.PING_PACKET;
+        }
+
+        override public void Encode()
+        {
+            MemoryStream memory = new MemoryStream();
+            BinaryWriter writer = new BinaryWriter(memory);
+            writer.Write(GetId()); //ID пакета
+            writer.Write(isCallback); //Ответный ли пакет
+            data = memory.ToArray();
+        }
+
+        public override void Decode()
+        {
+            MemoryStream memory = new MemoryStream(data);
+            BinaryReader reader = new BinaryReader(memory);
+            this.isCallback = reader.ReadBoolean(); //Ответный ли пакет
+        }
+    }
+}
