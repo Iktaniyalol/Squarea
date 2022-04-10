@@ -30,7 +30,9 @@ namespace Client.Net.Packets
         {
             if (!isCallback)
             {
-                Client.GetInstance.SendPacketToServer(new PingPacket());
+                PingPacket ping = new PingPacket();
+                ping.isCallback = true;
+                session.SendPacket(ping);
             }
         }
     }
