@@ -28,7 +28,12 @@ namespace Server.Net.Packets
 
         public override void Handle(PlayerSession session)
         {
-            //TODO
+            if (!isCallback)
+            {
+                PingPacket ping = new PingPacket();
+                ping.isCallback = true;
+                session.SendPacket(ping);
+            }
         }
     }
 }

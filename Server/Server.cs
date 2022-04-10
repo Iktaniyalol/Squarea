@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Net;
 using Server.Net;
+using Server.Data;
+using System.Collections.Generic;
+using Server.Net.Packets;
 
 namespace Server
 {
@@ -10,24 +13,51 @@ namespace Server
         int port = 27767; // порт для приема входящих запросов
         ushort maxPlayers = 30; //максимальное количество игроков, может быть в будущем настроено через файл настройки сервера.
         Player[] players;
-
+        DataBase dataBase;
         Network network;
 
         public Server()
         {
-            players = new Player[maxPlayers]; //Создаем массив игроков
-
+            this.players = new Player[maxPlayers]; //Создаем массив игроков
+            this.dataBase = new DataBase(@"URI=file://players.db"); //Инициализируем базу данных
+            this.dataBase.CreateRegistrationTable();
+            //this.dataBase.InsertPlayerRegistration(new PlayerRegistration("iktaniyalol", "123456", ""));
+            //Console.WriteLine(dataBase.GetPlayerRegistration("iktaniyalol").password);
             //TODO различные загрузки
             // Подключаем сервер к сети
-            network = new Network(this, new IPEndPoint(IP, port), maxPlayers);
+            this.network = new Network(this, new IPEndPoint(IP, port), 1000);
             Console.WriteLine("Сервер запущен.");
         }
 
-        public Network GetNetwork
+        public Network Network
         {
             get
             {
                 return network;
+            }
+        }
+
+        public DataBase DataBase
+        {
+            get
+            {
+                return dataBase;
+            }
+        }
+
+        public void sendPacketTo(DataPacket packet, List<Player> players)
+        {
+            foreach (Player player in players)
+            {
+                player.Session.SendPacket(packet);
+            }
+        }
+
+        public void sendPacketTo(DataPacket packet, params Player[] players)
+        {
+            foreach(Player player in players)
+            {
+                player.Session.SendPacket(packet);
             }
         }
     }
