@@ -21,8 +21,7 @@ namespace Server
             this.players = new Player[maxPlayers]; //Создаем массив игроков
             this.dataBase = new DataBase(@"URI=file://players.db"); //Инициализируем базу данных
             this.dataBase.CreateRegistrationTable();
-            //this.dataBase.InsertPlayerRegistration(new PlayerRegistration("iktaniyalol", "123456", ""));
-            //Console.WriteLine(dataBase.GetPlayerRegistration("iktaniyalol").password);
+            Console.WriteLine(dataBase.GetPlayerRegistration("iktaniyalol").password);
             //TODO различные загрузки
             // Подключаем сервер к сети
             this.network = new Network(this, new IPEndPoint(IP, port), 1000);
