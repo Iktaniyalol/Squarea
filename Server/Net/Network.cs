@@ -61,6 +61,7 @@ namespace Server.Net
             packets[DataPacket.REGISTER_RESULT_PACKET] = typeof(RegisterResultPacket);
             packets[DataPacket.LOGIN_PACKET] = typeof(LoginPacket);
             packets[DataPacket.LOGIN_RESULT_PACKET] = typeof(LoginResultPacket);
+            packets[DataPacket.PING_PACKET] = typeof(PingPacket);
             packets[DataPacket.PLAYER_CONNECT_PACKET] = typeof(PlayerConnectPacket);
             packets[DataPacket.PLAYER_DISCONNECT_PACKET] = typeof(PlayerDisconnectPacket);
             packets[DataPacket.PLAYER_SPAWN_PACKET] = typeof(PlayerSpawnPacket);
@@ -126,7 +127,6 @@ namespace Server.Net
             byte[] packetSizeData = new byte[4];
             while (true)
             {
-
                 if (Network.networkDestroyed || stopSession)
                 {
                     CloseSession();
@@ -142,6 +142,7 @@ namespace Server.Net
                 {
                     while (tcpClient.Client.Available == 0)
                     {
+                        Thread.Sleep(20);
                         if (Network.networkDestroyed || stopSession)
                         {
                             CloseSession();
@@ -185,6 +186,7 @@ namespace Server.Net
             Array.Copy(packetData, 1, packet.Data, 0, packet.Data.Length);
             //packet.Decode();
             inbound.Enqueue(packet);
+            Console.WriteLine(packet.GetType().Name + " успешно получен");
         }
         private void CloseSession()
         {
@@ -201,6 +203,7 @@ namespace Server.Net
                 }
                 while (inbound.Count < 1)
                 {
+                    Thread.Sleep(20);
                     if (Network.networkDestroyed || stopSession)
                     {
                         CloseSession();
@@ -223,6 +226,7 @@ namespace Server.Net
                 }
                 while (outbound.Count < 1)
                 {
+                    Thread.Sleep(20);
                     if (Network.networkDestroyed || stopSession)
                     {
                         CloseSession();
