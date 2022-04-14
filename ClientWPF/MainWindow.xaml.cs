@@ -273,7 +273,7 @@ namespace ClientWPF
                                 }
                             case RegisterResultPacket.Result.Success:
                                 {
-                                    window.SetActiveRegisterGrid();
+                                    window.SetActiveLoginGrid();
                                     break;
                                 }
                             default:
