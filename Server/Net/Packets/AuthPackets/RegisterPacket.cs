@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using Server.Data;
+using System;
 
 namespace Server.Net.Packets
 {
@@ -26,13 +28,37 @@ namespace Server.Net.Packets
         {
             MemoryStream memory = new MemoryStream(data);
             BinaryReader reader = new BinaryReader(memory);
-            this.username = reader.ReadString(); //Логин регистрирующегося пользователя
-            this.password = reader.ReadString(); //Пароль, зашифрованный SHA256
+            username = reader.ReadString(); //Логин регистрирующегося пользователя
+            password = reader.ReadString(); //Пароль, зашифрованный SHA256
         }
 
         public override void Handle(PlayerSession session)
         {
-            //TODO
+            if (Server.Instance.DataBase == null)
+            {
+                Console.WriteLine("~");
+                RegisterResultPacket registerResultPacket = new RegisterResultPacket();
+                registerResultPacket.status = RegisterResultPacket.Result.Error;
+                session.SendPacket(registerResultPacket);
+            }
+            else
+            {
+                PlayerRegistration reg = Server.Instance.DataBase.GetPlayerRegistration(username);
+                if (reg == null)
+                {
+                    reg = new PlayerRegistration(username, password, "");
+                    Server.Instance.DataBase.InsertPlayerRegistration(reg);
+                    RegisterResultPacket registerResultPacket = new RegisterResultPacket();
+                    registerResultPacket.status = RegisterResultPacket.Result.Success;
+                    session.SendPacket(registerResultPacket);
+                }
+                else
+                {
+                    RegisterResultPacket registerResultPacket = new RegisterResultPacket();
+                    registerResultPacket.status = RegisterResultPacket.Result.UsernameAlreadyUsed;
+                    session.SendPacket(registerResultPacket);
+                }
+            }
         }
     }
 }

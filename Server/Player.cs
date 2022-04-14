@@ -10,6 +10,7 @@ namespace Server
     public class Player
     {
         private PlayerSession session;
+        private string name;
 
         public Player(PlayerSession session)
         {
@@ -20,6 +21,14 @@ namespace Server
             get
             {
                 return this.session; // Уродливый код TODO кдал ить назу й   
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                return name;
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Server.Data;
 
 namespace Server.Net.Packets
 {
@@ -26,13 +27,43 @@ namespace Server.Net.Packets
         {
             MemoryStream memory = new MemoryStream(data);
             BinaryReader reader = new BinaryReader(memory);
-            this.username = reader.ReadString(); //Логин авторизующегося пользоваться
-            this.password = reader.ReadString(); //Пароль, зашифрованный SHA256
+            username = reader.ReadString(); //Логин авторизующегося пользоваться
+            password = reader.ReadString(); //Пароль, зашифрованный SHA256
         }
 
         public override void Handle(PlayerSession session)
         {
-            //TODO
+            if (Server.Instance.DataBase == null)
+            {
+                LoginResultPacket loginResultPacket = new LoginResultPacket();
+                loginResultPacket.status = LoginResultPacket.Result.Error;
+                session.SendPacket(loginResultPacket);
+            }
+            else
+            {
+                PlayerRegistration reg = Server.Instance.DataBase.GetPlayerRegistration(username);
+                if (reg == null)
+                {
+                    LoginResultPacket loginResultPacket = new LoginResultPacket();
+                    loginResultPacket.status = LoginResultPacket.Result.InvalidLoginOrPassword;
+                    session.SendPacket(loginResultPacket);
+                }
+                else
+                {
+                    if (reg.password != password)
+                    {
+                        LoginResultPacket loginResultPacket = new LoginResultPacket();
+                        loginResultPacket.status = LoginResultPacket.Result.InvalidLoginOrPassword;
+                        session.SendPacket(loginResultPacket);
+                    }
+                    else
+                    {
+                        LoginResultPacket loginResultPacket = new LoginResultPacket();
+                        loginResultPacket.status = LoginResultPacket.Result.Success;
+                        session.SendPacket(loginResultPacket);
+                    }
+                }
+            }
         }
     }
 }

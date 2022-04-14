@@ -1,4 +1,5 @@
-﻿namespace Server.Net.Packets
+﻿using System;
+namespace Server.Net.Packets
 {
     class GuestLoginPacket : DataPacket
     {
@@ -19,7 +20,15 @@
 
         public override void Handle(PlayerSession session)
         {
-            //TODO
+            Random random = new Random();
+            int numbers = random.Next(0, 1000000);
+            while (Server.Instance.GetPlayer("Guest" + numbers) != null)
+            {
+                numbers = random.Next(0, 1000000);
+            }
+            GuestLoginResultPacket guestLoginResultPacket = new GuestLoginResultPacket();
+            guestLoginResultPacket.playerName = "Guest" + numbers;
+            session.SendPacket(guestLoginResultPacket);
         }
     }
 }
