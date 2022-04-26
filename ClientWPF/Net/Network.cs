@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using System.Collections;
 using System.Threading;
 using ClientWPF.Net.Packets;
 using System;
@@ -17,7 +16,7 @@ namespace ClientWPF.Net
         IPEndPoint iPEndPointOfServer;
         static Type[] packets = new Type[20];
         public bool connected = false;
-        bool pingAccepted = false;
+        public bool pingAccepted = false;
         List<Thread> threads = new List<Thread>();
         bool networkDestroyed = false;
 
@@ -171,18 +170,33 @@ namespace ClientWPF.Net
             inbound.Enqueue(packet);
         }
 
-        public void TcpSendPacket(DataPacket packet)
+        public void TcpSendPacket(DataPacket packet, bool instantly = false)
         {
-            packet.Encode();
-            outbound.Enqueue(packet);
+            if (instantly)
+            {
+                packet.Encode();
+                byte[] dataToSend = new byte[packet.Data.Length + 4];
+                Array.Copy(BitConverter.GetBytes(packet.Data.Length), 0, dataToSend, 0, 4);
+                Array.Copy(packet.Data, 0, dataToSend, 4, packet.Data.Length);
+                if (!tcpClient.Connected)
+                {
+                    return;
+                }
+                tcpClient.Client.Send(dataToSend);
+            } else
+            {
+                packet.Encode();
+                outbound.Enqueue(packet);
+            }
         }
+
         public void DestroyNetworkThreads()
         {
             networkDestroyed = true;
             tcpClient.Close();
         }
 
-        void RegisterPackets()
+        private void RegisterPackets()
         {
             packets[DataPacket.REGISTER_PACKET] = typeof(RegisterPacket);
             packets[DataPacket.REGISTER_RESULT_PACKET] = typeof(RegisterResultPacket);
@@ -190,7 +204,7 @@ namespace ClientWPF.Net
             packets[DataPacket.LOGIN_RESULT_PACKET] = typeof(LoginResultPacket);
             packets[DataPacket.PING_PACKET] = typeof(PingPacket);
             packets[DataPacket.PLAYER_CONNECT_PACKET] = typeof(PlayerConnectPacket);
-            packets[DataPacket.PLAYER_DISCONNECT_PACKET] = typeof(PlayerDisconnectPacket);
+            packets[DataPacket.DISCONNECT_PACKET] = typeof(DisconnectPacket);
             packets[DataPacket.PLAYER_SPAWN_PACKET] = typeof(PlayerSpawnPacket);
             packets[DataPacket.TEXT_PACKET] = typeof(TextPacket);
             packets[DataPacket.PLAYER_MOVE_PACKET] = typeof(PlayerMovePacket);
@@ -202,6 +216,7 @@ namespace ClientWPF.Net
             packets[DataPacket.ENTITY_REMOVE_PACKET] = typeof(EntityRemovePacket);
             packets[DataPacket.GUEST_LOGIN_PACKET] = typeof(GuestLoginPacket);
             packets[DataPacket.GUEST_LOGIN_RESULT_PACKET] = typeof(GuestLoginResultPacket);
+            packets[DataPacket.DISCONNECT_PACKET] = typeof(DisconnectPacket);
         }
 
         public static DataPacket GetPacket(byte id)
@@ -222,7 +237,7 @@ namespace ClientWPF.Net
             pingAccepted = true;
         }
 
-        public void InboundProcessing()
+        private void InboundProcessing()
         {
             while (true)
             {

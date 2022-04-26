@@ -3,6 +3,7 @@ using ClientWPF.Net;
 using ClientWPF.Net.Packets;
 using ClientWPF.Graphic;
 using System.Windows.Media;
+using System.Windows;
 
 namespace ClientWPF
 {
@@ -14,7 +15,7 @@ namespace ClientWPF
         
 
         Network network;
-        Game game; //Создается только тогда, когда игрок откроет GameWindow
+        GameEngine game; //Создается только тогда, когда игрок откроет GameWindow
         GameWindow gameWindow;
         MainWindow mainWindow;
         PreGameWindow preGameWindow;
@@ -34,7 +35,7 @@ namespace ClientWPF
             }
         }
 
-        public Game Game
+        public GameEngine Game
         {
             get
             {
@@ -86,14 +87,35 @@ namespace ClientWPF
             }
         }
 
-        public void SendPacketToServer(DataPacket packet)
+        public void SendPacketToServer(DataPacket packet, bool instantly = false)
         {
-            Network.TcpSendPacket(packet);
+            Network.TcpSendPacket(packet, instantly);
         }
 
         public void CreateGame(GameWindow gameWindow, Player player)
         {
-            game = new Game(gameWindow, player, this);
+            game = new GameEngine(gameWindow, player, this);
+        }
+
+        public void DisconnectFromServer()
+        {
+            SendPacketToServer(new DisconnectPacket(), true);
+        }
+
+        public void Close()
+        {
+            Close(false);
+        }
+
+        public void Close(bool wasServerInitiated)
+        {
+            if (wasServerInitiated)
+            {
+                MessageBox.Show("Разорвано соединение с сервером.");
+            }
+
+            Client.Instance.Network.DestroyNetworkThreads();
+            Application.Current.Shutdown();
         }
     }
 }

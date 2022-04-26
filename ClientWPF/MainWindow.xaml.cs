@@ -1,19 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 using ClientWPF.Net.Packets;
+using System.Text.RegularExpressions;
+using System.Security.Cryptography;
 
 namespace ClientWPF
 {
@@ -82,30 +73,48 @@ namespace ClientWPF
 
         private void AuthWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (!isClosedForTransition) Client.Instance.Network.DestroyNetworkThreads();
+            if (!isClosedForTransition)
+            {
+                Client.Instance.DisconnectFromServer();
+                Client.Instance.Close();
+            }
         }
 
         private void LogBackButton_Click(object sender, RoutedEventArgs e)
         {
             NicknameInput.Text = "";
-            PasswordInput.Text = "";
+            PasswordInput.Password = "";
+            NicknameInput1.Text = "";
+            RetypePasswordInput.Password = "";
+            PasswordInput1.Password = "";
             SetActiveAuthGrid();
         }
 
         private void RegBackButton_Click(object sender, RoutedEventArgs e)
         {
+            NicknameInput.Text = "";
+            PasswordInput.Password = "";
             NicknameInput1.Text = "";
-            RetypePasswordInput.Text = "";
-            PasswordInput1.Text = "";
+            RetypePasswordInput.Password = "";
+            PasswordInput1.Password = "";
             SetActiveAuthGrid();
         }
 
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
-            //Регексы
+            if (!Regex.IsMatch(NicknameInput.Text, "^[a-zA-Z0-9_-]{3,20}$"))
+            {
+                MessageBox.Show("Недопустимый никнейм. Допустимая длина: 3-20\nДопустимые символы:\nанглийские буквы, цифры, нижнее подчеркивание и дефис.");
+                return;
+            }
+            if (!Regex.IsMatch(PasswordInput.Password, "^((?=.*[a-zA-Z])(?=.*[0-9]).{6,20})$"))
+            {
+                MessageBox.Show("Недопустимый пароль. Длина пароля должна быть от 6 до 20\nи он должен обязательно содержать буквы любого регистра и цифры.");
+                return;
+            }
             LoginPacket loginPacket = new LoginPacket();
             loginPacket.username = NicknameInput.Text;
-            loginPacket.password = PasswordInput.Text;
+            loginPacket.password = PasswordInput.Password;
             Client.Instance.SendPacketToServer(loginPacket);
             SetActiveLoadingGrid();
             countdown = new WaitCallbackCountdown(this, WaitCallbackCountdown.CallbackType.LOGIN, 5);
@@ -116,15 +125,24 @@ namespace ClientWPF
 
         private void RegisterButton_Click(object sender, RoutedEventArgs e)
         {
-            //Регексы
-            if (PasswordInput1.Text != RetypePasswordInput.Text)
+            if (PasswordInput1.Password != RetypePasswordInput.Password)
             {
                 MessageBox.Show("Введённые пароли не совпадают!");
                 return;
             }
+            if (!Regex.IsMatch(NicknameInput1.Text, "^[a-zA-Z0-9_-]{3,20}$"))
+            {
+                MessageBox.Show("Недопустимый никнейм. Допустимая длина: 3-20;\nДопустимые символы:\nанглийские буквы, цифры, нижнее подчеркивание и дефис.");
+                return;
+            }
+            if (!Regex.IsMatch(PasswordInput1.Password, "^((?=.*[a-zA-Z])(?=.*[0-9]).{6,20})$"))
+            {
+                MessageBox.Show("Недопустимый пароль. Длина пароля должна быть от 6 до 20\nи он должен обязательно содержать буквы любого регистра и цифры.");
+                return;
+            }
             RegisterPacket registerPacket = new RegisterPacket();
             registerPacket.username = NicknameInput1.Text;
-            registerPacket.password = PasswordInput1.Text;
+            registerPacket.password = PasswordInput1.Password;
             Client.Instance.SendPacketToServer(registerPacket);
             SetActiveLoadingGrid();
             countdown = new WaitCallbackCountdown(this, WaitCallbackCountdown.CallbackType.REGISTER, 5);

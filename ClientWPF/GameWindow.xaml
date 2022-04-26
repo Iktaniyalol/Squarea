@@ -7,8 +7,9 @@
         mc:Ignorable="d"
         Title="Squarea" Height="450" Width="800" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp" Closing="Window_Closing">
     <Grid>
-        <Image x:Name="ImagePlayer" HorizontalAlignment="Center" Height="52" Margin="0,0,0,0" VerticalAlignment="Center" Width="64" Source="/Resources/Images/square4.png" Stretch="UniformToFill" StretchDirection="Both"/>
-        <Canvas/>
+        <Viewbox Width="64" Height="58">
+            <Image x:Name="ImagePlayer" HorizontalAlignment="Center" Height="58" VerticalAlignment="Center" Width="64" Source="/Resources/Images/square4.png" Stretch="UniformToFill" StretchDirection="Both"/>
+        </Viewbox>
 
     </Grid>
 </Window>
