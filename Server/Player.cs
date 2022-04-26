@@ -11,6 +11,7 @@ namespace Server
     {
         private PlayerSession session;
         private string name;
+        private List<Player> viewers = new List<Player>();
 
         public Player(PlayerSession session)
         {
@@ -29,6 +30,14 @@ namespace Server
             get
             {
                 return name;
+            }
+        }
+
+        public List<Player> Viewers
+        {
+            get
+            {
+                return viewers;
             }
         }
     }

@@ -29,6 +29,7 @@ namespace Server.Net.Packets
             GuestLoginResultPacket guestLoginResultPacket = new GuestLoginResultPacket();
             guestLoginResultPacket.playerName = "Guest" + numbers;
             session.SendPacket(guestLoginResultPacket);
+            session.isAuthorized = true;
         }
     }
 }
