@@ -5,6 +5,7 @@ using ClientWPF.Data;
 using System.Collections.Generic;
 using System.Windows.Threading;
 using System.Windows;
+using ClientWPF.Net.Packets;
 using System;
 
 namespace ClientWPF
@@ -16,16 +17,18 @@ namespace ClientWPF
         PlayerSprite64 sprite64;
         PlayerSprite128 sprite128;
         Color color;
-        Image playerInGameImage;
+        public Image playerInGameImage;
+        public Label playerNicknameLabel;
         List<Player> viewers = new List<Player>();
         ClientWPF.Graphic.Frame spriteFrame;
         PlayerState playerState = PlayerState.STANDING_DOWN;
         int localTicks = 0;
 
-        public Player(string name, Image playerInGameImage, PlayerSprite64 sprite64, PlayerSprite128 sprite128, Color color)
+        public Player(string name, Label playerNicknameLabel, Image playerInGameImage, PlayerSprite64 sprite64, PlayerSprite128 sprite128, Color color)
         {
             this.name = name;
             this.playerInGameImage = playerInGameImage;
+            this.playerNicknameLabel = playerNicknameLabel;
             this.sprite64 = sprite64;
             this.sprite128 = sprite128;
             this.spriteFrame = sprite64.downFrame;
@@ -81,7 +84,7 @@ namespace ClientWPF
             }
         }
 
-        public void Move(double x, double y)
+        public void Move(double x, double y, bool isServer = false)
         {
             if (y > 0)
             {
@@ -114,6 +117,16 @@ namespace ClientWPF
                     localTicks = 0;
                     playerState = PlayerState.MOVING_LEFT;
                 }
+            }
+            this.x += x;
+            this.y += y;
+            if (!isServer)
+            {
+                PlayerMovePacket playerMovePacket = new PlayerMovePacket();
+                playerMovePacket.x = this.x;
+                playerMovePacket.y = this.y;
+                playerMovePacket.nickname = this.name;
+                Client.Instance.SendPacketToServer(playerMovePacket);
             }
         }
 
@@ -225,6 +238,21 @@ namespace ClientWPF
             }
         }
 
+        public void Teleport(double x, double y, bool isServer = false)
+        {
+            this.x = x;
+            this.y = y;
+            StopMove();
+            if (!isServer)
+            {
+                PlayerMovePacket playerMovePacket = new PlayerMovePacket();
+                playerMovePacket.x = x;
+                playerMovePacket.y = y;
+                playerMovePacket.nickname = this.Name;
+                Client.Instance.SendPacketToServer(playerMovePacket);
+            }
+        }
+
         public enum PlayerState
         {
             STANDING_LEFT,
@@ -240,6 +268,14 @@ namespace ClientWPF
             JUMP_RIGHT,
             JUMP_UP,
             JUMP_DOWN
+        }
+
+        public List<Player> Viewers
+        {
+            get
+            {
+                return viewers;
+            }
         }
     }
 }

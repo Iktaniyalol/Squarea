@@ -4,6 +4,7 @@ using ClientWPF.Net.Packets;
 using ClientWPF.Graphic;
 using System.Windows.Media;
 using System.Windows;
+using System.Diagnostics;
 
 namespace ClientWPF
 {
@@ -116,6 +117,7 @@ namespace ClientWPF
 
             Client.Instance.Network.DestroyNetworkThreads();
             Application.Current.Shutdown();
+            Process.GetCurrentProcess().Kill();
         }
     }
 }

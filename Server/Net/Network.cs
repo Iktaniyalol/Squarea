@@ -75,7 +75,7 @@ namespace Server.Net
             packets[DataPacket.ENTITY_REMOVE_PACKET] = typeof(EntityRemovePacket);
             packets[DataPacket.GUEST_LOGIN_PACKET] = typeof(GuestLoginPacket);
             packets[DataPacket.GUEST_LOGIN_RESULT_PACKET] = typeof(GuestLoginResultPacket);
-            packets[DataPacket.DISCONNECT_PACKET] = typeof(DisconnectPacket);
+            packets[DataPacket.PLAYER_START_GAME_PACKET] = typeof(PlayerStartGamePacket);
         }
 
         public static DataPacket GetPacket(byte id)

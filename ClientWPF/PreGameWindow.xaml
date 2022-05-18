@@ -90,7 +90,7 @@
             <Grid Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="0.3*"/>
@@ -98,7 +98,7 @@
                 </Grid.RowDefinitions>
                 <Label Grid.Column ="1" x:Name="NicknameLabel" Content="Ник" HorizontalAlignment="Center" FontFamily="Comic Sans MS" FontSize="14" VerticalAlignment="Top"/>
                 <Viewbox Grid.Row="2" Grid.Column="1" Margin="0,0,0,0" Width="128" Height="116">
-                    <Image x:Name="PlayerSpriteImage" Source="/Resources/Images/square4.png" Stretch="None" StretchDirection="Both" Width="128" Height="116" HorizontalAlignment="Center" Cursor="Hand"/>
+                    <Image x:Name="PlayerSpriteImage" Source="/Resources/Images/square4.png" Stretch="Fill" StretchDirection="UpOnly" Width="128" Height="116" HorizontalAlignment="Center" Cursor="Hand"/>
                 </Viewbox>
 
 

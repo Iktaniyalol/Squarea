@@ -5,6 +5,7 @@ using System.Windows.Threading;
 using ClientWPF.Net.Packets;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace ClientWPF
 {
@@ -114,7 +115,9 @@ namespace ClientWPF
             }
             LoginPacket loginPacket = new LoginPacket();
             loginPacket.username = NicknameInput.Text;
-            loginPacket.password = PasswordInput.Password;
+
+            SHA256 sha256 = SHA256.Create();       
+            loginPacket.password = Encoding.UTF8.GetString(sha256.ComputeHash(Encoding.UTF8.GetBytes(PasswordInput.Password)));
             Client.Instance.SendPacketToServer(loginPacket);
             SetActiveLoadingGrid();
             countdown = new WaitCallbackCountdown(this, WaitCallbackCountdown.CallbackType.LOGIN, 5);
@@ -142,7 +145,8 @@ namespace ClientWPF
             }
             RegisterPacket registerPacket = new RegisterPacket();
             registerPacket.username = NicknameInput1.Text;
-            registerPacket.password = PasswordInput1.Password;
+            SHA256 sha256 = SHA256.Create();
+            registerPacket.password = Encoding.UTF8.GetString(sha256.ComputeHash(Encoding.UTF8.GetBytes(PasswordInput1.Password)));
             Client.Instance.SendPacketToServer(registerPacket);
             SetActiveLoadingGrid();
             countdown = new WaitCallbackCountdown(this, WaitCallbackCountdown.CallbackType.REGISTER, 5);

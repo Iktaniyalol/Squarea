@@ -20,6 +20,7 @@
         public const int ENTITY_REMOVE_PACKET = 15;
         public const int GUEST_LOGIN_PACKET = 16;
         public const int GUEST_LOGIN_RESULT_PACKET = 17;
+        public const int PLAYER_START_GAME_PACKET = 18;
         //TODO Новые пакеты
 
         protected byte[] data;

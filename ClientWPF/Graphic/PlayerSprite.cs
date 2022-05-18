@@ -3,10 +3,11 @@ using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Media;
 using System.Collections.Generic;
+using System;
 
 namespace ClientWPF.Graphic
 {
-    public class PlayerSprite
+    public class PlayerSprite : ICloneable
     {
         protected int spriteWidth = 32;
         protected int spriteHeight = 29;
@@ -124,7 +125,19 @@ namespace ClientWPF.Graphic
             downMoveFrames[3].FrameBitMap = new CroppedBitmap(coloredOrigin, new Int32Rect(spriteWidth * 2, 0, spriteWidth, spriteHeight));
         }
 
-        
+        public object Clone()
+        {
+            if (this is PlayerSprite64)
+            {
+                return new PlayerSprite64(origin.Clone(), originJump.Clone(), null);
+            } else if (this is PlayerSprite128)
+            {
+                return new PlayerSprite128(origin.Clone(), originJump.Clone(), null);
+            } else
+            {
+                return new PlayerSprite(origin.Clone(), originJump.Clone(), null);
+            }
+        }
     }
 
     //public class JumpAnimation

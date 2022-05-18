@@ -26,9 +26,13 @@ namespace Server.Net.Packets
             //Если пришел пакет от клиента
             if (session.player != null)
             {
-                foreach (Player viewer in session.player.Viewers)
+                for (int i = session.player.Viewers.Count - 1; i >= 0; i--)
                 {
-                    viewer.Session.SendPacket(new PlayerRemovePacket()); //TODO
+                    Player viewer = session.player.Viewers[i];
+                    PlayerRemovePacket playerRemovePacket = new PlayerRemovePacket();
+                    playerRemovePacket.username = session.player.Name;
+                    viewer.Session.SendPacket(playerRemovePacket);
+                    session.player.Viewers.Remove(viewer);
                 }
                 Server.Instance.RemovePlayer(session.player);
             }

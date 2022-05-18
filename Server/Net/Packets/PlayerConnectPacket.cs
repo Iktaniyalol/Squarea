@@ -6,7 +6,7 @@ namespace Server.Net.Packets
 {
     class PlayerConnectPacket : DataPacket
     {
-        public String username;
+        public string username;
         public Color color;
 
         override public byte GetId()
@@ -42,7 +42,22 @@ namespace Server.Net.Packets
 
         public override void Handle(PlayerSession session)
         {
-            //TODO
+            if (!session.isAuthorized)
+            {
+                Server.Instance.DisconnectSession(session);
+                Console.WriteLine("Попытка неавторизованного входа в игру.");
+                return;
+            }
+
+            Player player = new Player(session, username, color);
+            session.player = player;
+            Server.Instance.AddPlayer(player);
+            Random rand = new Random();
+            PlayerStartGamePacket startGamePacket = new PlayerStartGamePacket();
+            startGamePacket.x = rand.Next(-50, 50);
+            startGamePacket.y = rand.Next(-50, 50);
+            //TODO SEED
+            session.SendPacket(startGamePacket);
         }
     }
 }

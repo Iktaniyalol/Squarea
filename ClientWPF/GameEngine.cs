@@ -34,7 +34,10 @@ namespace ClientWPF
                 }
                 doTick = false;
                 player.Tick();
-                //TODO код тиков игроков, мира, и прочего
+                foreach(Player player1 in player.Viewers.ToArray())
+                {
+                    player1.Tick();
+                }
             }
         }
 

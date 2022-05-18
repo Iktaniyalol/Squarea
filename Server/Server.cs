@@ -98,6 +98,17 @@ namespace Server
             players.Remove(remove);
         }
 
+        public Player AddPlayer(Player player)
+        {
+            players.Add(player);
+            return player;
+        }
+
+        public List<Player> GetPlayers()
+        {
+            return players;
+        }
+
 
         public void DisconnectPlayer(Player player)
         {
@@ -110,10 +121,15 @@ namespace Server
             session.StopSession();
             if (session.player != null)
             {
-                foreach (Player viewer in session.player.Viewers)
+                for (int i = session.player.Viewers.Count - 1; i >= 0; i--)
                 {
-                    viewer.Session.SendPacket(new PlayerRemovePacket()); //TODO Данные
+                    Player viewer = session.player.Viewers[i];
+                    PlayerRemovePacket playerRemovePacket = new PlayerRemovePacket();
+                    playerRemovePacket.username = viewer.Name;
+                    session.SendPacket(playerRemovePacket);
+                    session.player.Viewers.Remove(viewer);
                 }
+                session.player = null;
                 RemovePlayer(session.player);
             }
         }
