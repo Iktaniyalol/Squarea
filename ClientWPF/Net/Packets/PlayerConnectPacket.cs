@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Drawing;
+using System.Windows.Media;
 
 namespace ClientWPF.Net.Packets
 {
@@ -37,12 +37,7 @@ namespace ClientWPF.Net.Packets
             byte r = reader.ReadByte();
             byte g = reader.ReadByte();
             byte b = reader.ReadByte();
-            this.color = Color.FromArgb(r,g,b);
-        }
-
-        public override void Handle(Client client)
-        {
-            //TODO
+            this.color = Color.FromRgb(r,g,b);
         }
     }
 }

@@ -61,6 +61,7 @@ namespace Server.Net.Packets
                         LoginResultPacket loginResultPacket = new LoginResultPacket();
                         loginResultPacket.status = LoginResultPacket.Result.Success;
                         session.SendPacket(loginResultPacket);
+                        session.isAuthorized = true;
                     }
                 }
             }

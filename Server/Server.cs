@@ -53,20 +53,25 @@ namespace Server
             }
         }
 
-        public void sendPacketTo(DataPacket packet, List<Player> players)
+        public void sendPacketTo(DataPacket packet, List<Player> players, bool instantly = false)
         {
             foreach (Player player in players)
             {
-                player.Session.SendPacket(packet);
+                player.Session.SendPacket(packet, instantly);
             }
         }
 
-        public void sendPacketTo(DataPacket packet, params Player[] players)
+        public void sendPacketTo(DataPacket packet, Player[] players, bool instantly = false)
         {
             foreach(Player player in players)
             {
-                player.Session.SendPacket(packet);
+                player.Session.SendPacket(packet, instantly);
             }
+        }
+
+        public void sendPacketTo(DataPacket packet, Player player, bool instantly = false)
+        {
+            player.Session.SendPacket(packet, instantly);
         }
 
         public Player GetPlayer(String name)
@@ -76,6 +81,57 @@ namespace Server
                 if (player.Name == name) return player;
             }
             return null;
+        }
+
+        public void RemovePlayer(Player player)
+        {
+            players.Remove(player);
+        }
+
+        public void RemovePlayer(String name)
+        {
+            Player remove = null;
+            foreach (Player player in players)
+            {
+                if (player.Name == name) remove = player;
+            }
+            players.Remove(remove);
+        }
+
+        public Player AddPlayer(Player player)
+        {
+            players.Add(player);
+            return player;
+        }
+
+        public List<Player> GetPlayers()
+        {
+            return players;
+        }
+
+
+        public void DisconnectPlayer(Player player)
+        {
+            DisconnectSession(player.Session);
+        }
+
+        public void DisconnectSession(PlayerSession session)
+        {
+            session.SendPacket(new DisconnectPacket(), true);
+            session.StopSession();
+            if (session.player != null)
+            {
+                for (int i = session.player.Viewers.Count - 1; i >= 0; i--)
+                {
+                    Player viewer = session.player.Viewers[i];
+                    PlayerRemovePacket playerRemovePacket = new PlayerRemovePacket();
+                    playerRemovePacket.username = viewer.Name;
+                    session.SendPacket(playerRemovePacket);
+                    session.player.Viewers.Remove(viewer);
+                }
+                session.player = null;
+                RemovePlayer(session.player);
+            }
         }
     }
 }

@@ -8,7 +8,7 @@
         public const int LOGIN_RESULT_PACKET = 3;
         public const int PING_PACKET = 4;
         public const int PLAYER_CONNECT_PACKET = 5;
-        public const int PLAYER_DISCONNECT_PACKET = 6;
+        public const int DISCONNECT_PACKET = 6;
         public const int PLAYER_SPAWN_PACKET = 7;
         public const int TEXT_PACKET = 8;
         public const int PLAYER_MOVE_PACKET = 9;
@@ -20,6 +20,7 @@
         public const int ENTITY_REMOVE_PACKET = 15;
         public const int GUEST_LOGIN_PACKET = 16;
         public const int GUEST_LOGIN_RESULT_PACKET = 17;
+        public const int PLAYER_START_GAME_PACKET = 18;
         //TODO Новые пакеты
 
         protected byte[] data;

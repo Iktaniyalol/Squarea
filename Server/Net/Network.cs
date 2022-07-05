@@ -63,7 +63,7 @@ namespace Server.Net
             packets[DataPacket.LOGIN_RESULT_PACKET] = typeof(LoginResultPacket);
             packets[DataPacket.PING_PACKET] = typeof(PingPacket);
             packets[DataPacket.PLAYER_CONNECT_PACKET] = typeof(PlayerConnectPacket);
-            packets[DataPacket.PLAYER_DISCONNECT_PACKET] = typeof(PlayerDisconnectPacket);
+            packets[DataPacket.DISCONNECT_PACKET] = typeof(DisconnectPacket);
             packets[DataPacket.PLAYER_SPAWN_PACKET] = typeof(PlayerSpawnPacket);
             packets[DataPacket.TEXT_PACKET] = typeof(TextPacket);
             packets[DataPacket.PLAYER_MOVE_PACKET] = typeof(PlayerMovePacket);
@@ -75,6 +75,7 @@ namespace Server.Net
             packets[DataPacket.ENTITY_REMOVE_PACKET] = typeof(EntityRemovePacket);
             packets[DataPacket.GUEST_LOGIN_PACKET] = typeof(GuestLoginPacket);
             packets[DataPacket.GUEST_LOGIN_RESULT_PACKET] = typeof(GuestLoginResultPacket);
+            packets[DataPacket.PLAYER_START_GAME_PACKET] = typeof(PlayerStartGamePacket);
         }
 
         public static DataPacket GetPacket(byte id)
@@ -102,10 +103,11 @@ namespace Server.Net
     public class PlayerSession
     {
         bool stopSession = false;
+        public bool isAuthorized = false;
         TcpClient tcpClient;
         Queue<DataPacket> inbound = new Queue<DataPacket>();
         Queue<DataPacket> outbound = new Queue<DataPacket>();
-        Player player;
+        public Player player;
 
         public void StopSession()
         {
@@ -129,13 +131,11 @@ namespace Server.Net
             {
                 if (Network.networkDestroyed || stopSession)
                 {
-                    CloseSession();
                     return;
                 }
                 if (tcpClient == null || !tcpClient.Connected)
                 {
                     StopSession();
-                    CloseSession();
                     return;
                 }
                 try
@@ -145,7 +145,6 @@ namespace Server.Net
                         Thread.Sleep(20);
                         if (Network.networkDestroyed || stopSession)
                         {
-                            CloseSession();
                             return;
                         }
                     }
@@ -188,17 +187,13 @@ namespace Server.Net
             inbound.Enqueue(packet);
             Console.WriteLine(packet.GetType().Name + " успешно получен");
         }
-        private void CloseSession()
-        {
-            //TODO Метод завершения сессии
-        }
+
         public void InboundProcessing()
         {
             while (true)
             {
                 if (Network.networkDestroyed || stopSession)
                 {
-                    CloseSession();
                     return;
                 }
                 while (inbound.Count < 1)
@@ -206,7 +201,6 @@ namespace Server.Net
                     Thread.Sleep(20);
                     if (Network.networkDestroyed || stopSession)
                     {
-                        CloseSession();
                         return;
                     }
                 }
@@ -221,7 +215,6 @@ namespace Server.Net
             {
                 if (Network.networkDestroyed || stopSession)
                 {
-                    CloseSession();
                     return;
                 }
                 while (outbound.Count < 1)
@@ -229,27 +222,32 @@ namespace Server.Net
                     Thread.Sleep(20);
                     if (Network.networkDestroyed || stopSession)
                     {
-                        CloseSession();
                         return;
                     }
                 }
                 if (tcpClient == null || !tcpClient.Connected)
                 {
                     StopSession();
-                    CloseSession();
                     return;
                 }
-                DataPacket packet = (DataPacket)outbound.Dequeue();
-                packet.Encode();
-                byte[] dataToSend = new byte[packet.Data.Length + 4];
-                Array.Copy(BitConverter.GetBytes(packet.Data.Length), 0, dataToSend, 0, 4);
-                Array.Copy(packet.Data, 0, dataToSend, 4, packet.Data.Length);
-                tcpClient.Client.Send(dataToSend);
+                DataPacket packet = outbound.Dequeue();
+                SendPacket(packet, true);
             }
         }
-        public void SendPacket(DataPacket dp)
+
+        public void SendPacket(DataPacket dp, bool instantly = false)
         {
-            outbound.Enqueue(dp);
+            if (instantly)
+            {
+                dp.Encode();
+                byte[] dataToSend = new byte[dp.Data.Length + 4];
+                Array.Copy(BitConverter.GetBytes(dp.Data.Length), 0, dataToSend, 0, 4);
+                Array.Copy(dp.Data, 0, dataToSend, 4, dp.Data.Length);
+                tcpClient.Client.Send(dataToSend);
+            } else
+            {
+                outbound.Enqueue(dp);
+            }
         }
 
         public void Ping()

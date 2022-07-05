@@ -1,19 +1,39 @@
 ﻿using ClientWPF.Graphic;
 using System.Windows.Media;
+using System.Windows.Controls;
+using ClientWPF.Data;
+using System.Collections.Generic;
+using System.Windows.Threading;
+using System.Windows;
+using ClientWPF.Net.Packets;
+using System;
 
 namespace ClientWPF
 {
-    public class Player
+    public class Player : ITickable
     {
         double x, y;
         string name;
-        PlayerSprite sprite;
+        PlayerSprite64 sprite64;
+        PlayerSprite128 sprite128;
         Color color;
+        public Image playerInGameImage;
+        public Label playerNicknameLabel;
+        List<Player> viewers = new List<Player>();
+        ClientWPF.Graphic.Frame spriteFrame;
+        PlayerState playerState = PlayerState.STANDING_DOWN;
+        int localTicks = 0;
 
-        public Player(string name, PlayerSprite sprite, Color color)
+        public Player(string name, Label playerNicknameLabel, Image playerInGameImage, PlayerSprite64 sprite64, PlayerSprite128 sprite128, Color color)
         {
             this.name = name;
-            this.sprite = sprite;
+            this.playerInGameImage = playerInGameImage;
+            this.playerNicknameLabel = playerNicknameLabel;
+            this.sprite64 = sprite64;
+            this.sprite128 = sprite128;
+            this.spriteFrame = sprite64.downFrame;
+            this.color = color;
+            playerInGameImage.Source = spriteFrame.FrameBitMap;
         }
 
         public double X
@@ -48,28 +68,213 @@ namespace ClientWPF
             }
         }
 
-        public PlayerSprite Sprite
+        public PlayerSprite64 Sprite64
         {
             get
             {
-                return sprite;
+                return sprite64;
             }
         }
 
-        public void Move(double x, double y)
+        public PlayerSprite128 Sprite128
+        {
+            get
+            {
+                return sprite128;
+            }
+        }
+
+        public void Move(double x, double y, bool isServer = false)
         {
             if (y > 0)
             {
-                sprite.SetState(PlayerSprite.SpriteState.DOWN);
-            } else if (y < 0)
+                if (playerState != PlayerState.MOVING_DOWN)
+                {
+                    localTicks = 0;
+                    playerState = PlayerState.MOVING_DOWN;
+                }
+            }
+            else if (y < 0)
             {
-                sprite.SetState(PlayerSprite.SpriteState.UP);
-            } else if (x > 0)
+                if (playerState != PlayerState.MOVING_UP)
+                {
+                    localTicks = 0;
+                    playerState = PlayerState.MOVING_UP;
+                }
+            }
+            else if (x > 0)
             {
-                sprite.SetState(PlayerSprite.SpriteState.RIGHT);
-            } else if (x < 0)
+                if (playerState != PlayerState.MOVING_RIGHT)
+                {
+                    localTicks = 0;
+                    playerState = PlayerState.MOVING_RIGHT;
+                }
+            }
+            else if (x < 0)
             {
-                sprite.SetState(PlayerSprite.SpriteState.LEFT);
+                if (playerState != PlayerState.MOVING_LEFT)
+                {
+                    localTicks = 0;
+                    playerState = PlayerState.MOVING_LEFT;
+                }
+            }
+            this.x += x;
+            this.y += y;
+            if (!isServer)
+            {
+                PlayerMovePacket playerMovePacket = new PlayerMovePacket();
+                playerMovePacket.x = this.x;
+                playerMovePacket.y = this.y;
+                playerMovePacket.nickname = this.name;
+                Client.Instance.SendPacketToServer(playerMovePacket);
+            }
+        }
+
+        public void StopMove()
+        {
+            switch(playerState)
+            {
+                case PlayerState.MOVING_LEFT:
+                    {
+                        playerState = PlayerState.STANDING_LEFT;
+                        break;
+                    }
+                case PlayerState.MOVING_RIGHT:
+                    {
+                        playerState = PlayerState.STANDING_RIGHT;
+                        break;
+                    }
+                case PlayerState.MOVING_UP:
+                    {
+                        playerState = PlayerState.STANDING_UP;
+                        break;
+                    }
+                case PlayerState.MOVING_DOWN:
+                    {
+                        playerState = PlayerState.STANDING_DOWN;
+                        break;
+                    }
+            }
+        }
+
+        public void Tick()
+        {
+            switch (playerState)
+            {
+                case PlayerState.STANDING_LEFT:
+                    {
+                        spriteFrame = sprite64.leftFrame;
+                        break;
+                    }
+                case PlayerState.STANDING_RIGHT:
+                    {
+                        spriteFrame = sprite64.rightFrame;
+                        break;
+                    }
+
+                case PlayerState.STANDING_UP:
+                    {
+                        spriteFrame = sprite64.upFrame;
+                        break;
+                    }
+                case PlayerState.STANDING_DOWN:
+                    {
+                        spriteFrame = sprite64.downFrame;
+                        break;
+                    }
+                case PlayerState.MOVING_LEFT:
+                    {
+                        spriteFrame = sprite64.leftMoveFrames[(localTicks / (Client.Instance.Game.tickPerSecond / 6)) % 2];
+                        break;
+                    }
+                case PlayerState.MOVING_RIGHT:
+                    {
+                        spriteFrame = sprite64.rightMoveFrames[(localTicks / (Client.Instance.Game.tickPerSecond / 6)) % 2];
+                        break;
+                    }
+                case PlayerState.MOVING_UP:
+                    {
+                        spriteFrame = sprite64.upMoveFrames[(localTicks / (Client.Instance.Game.tickPerSecond / 6)) % 4];
+                        break;
+                    }
+                case PlayerState.MOVING_DOWN:
+                    {
+                        spriteFrame = sprite64.downMoveFrames[(localTicks / (Client.Instance.Game.tickPerSecond / 6)) % 4];
+                        break;
+                    }
+                case PlayerState.DEATH:
+                    {
+                        //TODO
+                        break;
+                    }
+                case PlayerState.JUMP_LEFT:
+                    {
+                        //TODO
+                        break;
+                    }
+                case PlayerState.JUMP_RIGHT:
+                    {
+                        //TODO
+                        break;
+                    }
+                case PlayerState.JUMP_UP:
+                    {
+                        //TODO
+                        break;
+                    }
+                case PlayerState.JUMP_DOWN:
+                    {
+                        //TODO
+                        break;
+                    }
+            }
+            localTicks++;
+            try
+            {
+                Application.Current.Dispatcher.Invoke(new System.Action(() => { playerInGameImage.Source = spriteFrame.FrameBitMap; }));
+            } catch
+            {
+
+            }
+        }
+
+        public void Teleport(double x, double y, bool isServer = false)
+        {
+            this.x = x;
+            this.y = y;
+            StopMove();
+            if (!isServer)
+            {
+                PlayerMovePacket playerMovePacket = new PlayerMovePacket();
+                playerMovePacket.x = x;
+                playerMovePacket.y = y;
+                playerMovePacket.nickname = this.Name;
+                Client.Instance.SendPacketToServer(playerMovePacket);
+            }
+        }
+
+        public enum PlayerState
+        {
+            STANDING_LEFT,
+            STANDING_RIGHT,
+            STANDING_UP,
+            STANDING_DOWN,
+            MOVING_LEFT,
+            MOVING_RIGHT,
+            MOVING_DOWN,
+            MOVING_UP,
+            DEATH,
+            JUMP_LEFT,
+            JUMP_RIGHT,
+            JUMP_UP,
+            JUMP_DOWN
+        }
+
+        public List<Player> Viewers
+        {
+            get
+            {
+                return viewers;
             }
         }
     }

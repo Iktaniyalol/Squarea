@@ -36,7 +36,6 @@ namespace Server.Net.Packets
         {
             if (Server.Instance.DataBase == null)
             {
-                Console.WriteLine("~");
                 RegisterResultPacket registerResultPacket = new RegisterResultPacket();
                 registerResultPacket.status = RegisterResultPacket.Result.Error;
                 session.SendPacket(registerResultPacket);
@@ -57,6 +56,7 @@ namespace Server.Net.Packets
                     RegisterResultPacket registerResultPacket = new RegisterResultPacket();
                     registerResultPacket.status = RegisterResultPacket.Result.UsernameAlreadyUsed;
                     session.SendPacket(registerResultPacket);
+                    session.isAuthorized = true;
                 }
             }
         }
